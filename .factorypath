@@ -1,0 +1,6 @@
+<factorypath>
+    <factorypathentry kind="EXTJAR" id="C:\Users\ratte\.m2\repository\com\google\auto\value\auto-value\1.2\auto-value-1.2.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\ratte\.m2\repository\com\google\auto\value\auto-value\1.2\auto-value-1.2-sources.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\ratte\.m2\repository\com\google\guava\guava\20.0-hal\guava-20.0-hal.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="EXTJAR" id="C:\Users\ratte\.m2\repository\com\google\truth\truth\0.30\truth-0.30.jar" enabled="true" runInBatchMode="false"/>
+</factorypath>

@@ -47,7 +47,7 @@ public class Tile {
 
   private final Type type;
 
-  private Tile(Type type) {
+  Tile(Type type) {
     this.type = type;
   }
 

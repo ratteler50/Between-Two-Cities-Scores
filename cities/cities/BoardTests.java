@@ -33,7 +33,7 @@ public class BoardTests {
   @Test
   public void boardCanPrintItself() {
     StringBuilder expectedOutput = new StringBuilder();
-    expectedOutput.append("#1 in factories.\n");
+    expectedOutput.append("#1 in factories; Score: 48\n");
     expectedOutput.append("┌---------------------------------------------------┐\n");
     expectedOutput.append("|            |            |            |            |\n");
     expectedOutput.append("|  FACTORY   |TAVERN_DRINK|   OFFICE   |    PARK    |\n");
@@ -147,7 +147,6 @@ public class BoardTests {
             shop(), park(), factory(), park(), //
             park(), park(), shop(), bed(), //
             factory(), house(), office(), park()));
-    assertThat(board.getParkGroupSizes()).containsExactly(4,2,1);
     assertThat(board.scoreParks()).isEqualTo(23);
   }
 

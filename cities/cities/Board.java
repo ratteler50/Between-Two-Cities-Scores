@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -62,9 +60,10 @@ public class Board {
 
   final ImmutableTable<Integer, Integer, Tile> layout;
 
-  private final int factoryRanking;
+  final int factoryRanking;
 
   Board(int factoryRanking, List<Tile> tiles) {
+    Preconditions.checkArgument(ImmutableSet.of(1,2,3).contains(factoryRanking));
     Preconditions.checkArgument(tiles.size() == 16, "There must be exactly 16 tiles!");
     this.factoryRanking = factoryRanking;
     layout = buildTable(tiles);
@@ -78,32 +77,26 @@ public class Board {
 
   @VisibleForTesting
   Collection<Integer> getParkGroupSizes() {
-    // TODO(dlorant): Find the bug in this code.
     Set<Set<Tile>> groups = new HashSet<>();
     Set<Tile> allParks =
         graph.nodes().stream().filter(Tile::isPark).collect(toCollection(HashSet::new));
     for (Tile park : allParks) {
-      Optional<Set<Tile>> foundGroup = Optional.empty();
-      Iterator<Set<Tile>> iter = groups.iterator();
-      while (iter.hasNext()) {
-        Set<Tile> group = iter.next();
+      List<Set<Tile>> groupsContainingNeighbor = new ArrayList<>();
+      for (Set<Tile> group : groups) {
         if (graph.adjacentNodes(park).stream().anyMatch(p -> group.contains(p))) {
-          if (!foundGroup.isPresent()) {
-            group.add(park);
-            foundGroup = Optional.of(group);
-          } else {
-            foundGroup.get().addAll(group);
-            iter.remove();
-          }
+          groupsContainingNeighbor.add(group);
         }
       }
-      if (!foundGroup.isPresent()) {
-        Set<Tile> newGroup = new HashSet<>();
-        newGroup.add(park);
-        groups.add(newGroup);
-      }
+      Set<Tile> mergedGroup = new HashSet<>();
+      mergedGroup.add(park);
+      groupsContainingNeighbor.forEach(groups::remove);
+      groupsContainingNeighbor.forEach(mergedGroup::addAll);
+      groups.add(mergedGroup);
     }
-    return groups.stream().map(group -> group.size()).collect(toCollection(ArrayList::new));
+
+    List<Integer> sizes =
+        groups.stream().map(group -> group.size()).collect(toCollection(ArrayList::new));
+    return sizes;
   }
 
   private String getRowAsString(int row) {
@@ -334,8 +327,42 @@ public class Board {
   }
 
   public int getScore() {
-    return scoreFactories() + scoreHouses() + scoreOffices() + scoreParks()
-        + scoreShops() + scoreTaverns();
+    return scoreFactories() + scoreHouses() + scoreOffices() + scoreParks() + scoreShops()
+        + scoreTaverns();
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + factoryRanking;
+    result = prime * result + ((graph == null) ? 0 : graph.hashCode());
+    result = prime * result + ((layout == null) ? 0 : layout.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Board other = (Board) obj;
+    if (factoryRanking != other.factoryRanking)
+      return false;
+    if (graph == null) {
+      if (other.graph != null)
+        return false;
+    } else if (!graph.equals(other.graph))
+      return false;
+    if (layout == null) {
+      if (other.layout != null)
+        return false;
+    } else if (!layout.equals(other.layout))
+      return false;
+    return true;
   }
 
   @Override
@@ -348,7 +375,7 @@ public class Board {
     String row1 = getRowAsString(1);
     String row2 = getRowAsString(2);
     String row3 = getRowAsString(3);
-    return "#" + factoryRanking + " in factories.\n"
+    return "#" + factoryRanking + " in factories; Score: " + getScore() + "\n"
         + Stream
             .of(topRow, space, row0, space, middleSeparators, space, row1, space, middleSeparators,
                 space, row2, space, middleSeparators, space, row3, space, bottomRow)
